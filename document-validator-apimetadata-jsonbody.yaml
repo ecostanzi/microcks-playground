@@ -1,0 +1,22 @@
+apiVersion: mocks.microcks.io/v1alpha1
+kind: APIMetadata
+metadata:
+  name: Document Validation API
+  version: 1.0.0
+  labels:
+    team: IAA
+operations:
+  'POST /validate':
+    delay: 2000
+    dispatcher: JSON_BODY
+    dispatcherRules: |-
+      {
+        "exp": "/documentName",
+        "operator": "equals",
+        "cases": {
+          "InvalidDoc.pdf": "invalid_doc",
+          "ValidDoc.pdf": "valid_doc",
+          "ErrorDoc.pdf": "error_doc",
+          "TimeoutDoc.pdf": "timeout_doc"
+        }
+      }

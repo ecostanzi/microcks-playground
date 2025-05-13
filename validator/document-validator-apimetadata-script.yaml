@@ -1,0 +1,33 @@
+apiVersion: mocks.microcks.io/v1alpha1
+kind: APIMetadata
+metadata:
+  name: Document Validation API
+  version: 1.0.0
+  labels:
+    team: IAA
+operations:
+  'POST /validate':
+    delay: 0
+    dispatcher: SCRIPT
+    dispatcherRules: |
+      import java.lang.Thread
+      def body = new groovy.json.JsonSlurper().parseText(mockRequest.requestContent)
+      def name = body["documentName"]
+
+      if ("InvalidDoc.pdf".equals(name)) {
+        return "invalid_doc"
+      }
+
+      if ("ErrorDoc.pdf".equals(name)) {
+        Thread.sleep(2000)
+        return "error_doc"
+      }
+
+      if ("TimeoutDoc.pdf".equals(name)) {
+        Thread.sleep(10000)
+        return "timeout_doc"
+      }
+
+      Thread.sleep(2000)
+      return "valid_doc"
+

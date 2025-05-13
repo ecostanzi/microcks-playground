@@ -1,0 +1,140 @@
+
+openapi: 3.0.3
+info:
+  title: Document Validation API
+  description: API to validate a list of documents via JSON request with Base64-encoded content.
+  version: 1.0.0
+  license:
+    name: European Union Public License (EUPL) 1.2
+    url: https://interoperable-europe.ec.europa.eu/sites/default/files/custom-page/attachment/eupl_v1.2_en.pdf
+tags:
+  - name: Document Validation
+    description: SIMPL Document Validation
+paths:
+  /validate:
+    post:
+      summary: Validates a list of documents
+      description: Accepts a JSON request containing documents and their names, and validates them. Responds with a 204 if all documents are valid or an error code with details in case of failure.
+      operationId: validateDocument
+      tags:
+        - Document Validation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Document'
+            examples:
+              valid_doc:
+                value:
+                  documentName: ValidDoc.pdf
+              invalid_doc:
+                value:
+                  documentName: InvalidDoc.pdf
+              error_doc:
+                value:
+                  documentName: ErrorDoc.pdf
+              timeout_doc:
+                value:
+                  documentName: TimeoutDoc.pdf
+      responses:
+        '204':
+          description: All documents are valid, no content returned.
+          x-microcks-refs:
+            - valid_doc
+        '400':
+          description: Bad Request - One or more documents are invalid or missing required fields.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+              examples:
+                invalid_doc:
+                  value:
+                    type: /error/invalid-document
+                    title: "Uploaded document is invalid"
+                    errors:
+                      - code: "DOC_FORMAT_INVALID"
+                        documentName: "{{request.body/documentName}}"
+                        message: "The document format is invalid."
+
+        '500':
+          description: Internal Server Error - Unexpected error during document validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              examples:
+                error_doc:
+                  value:
+                    type: /error/internal-server-error
+                    title: "An unknown error occurred while validating the document"
+        '502':
+          description: Gateway timeout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              examples:
+                timeout_doc:
+                  value:
+                    type: /error/gateway-timeout
+                    title: "Validation service https://test.com did not respond"
+
+components:
+  schemas:
+    Document:
+      type: object
+      properties:
+        documentName:
+          type: string
+          description: Name of the document.
+        documentContent:
+          type: string
+          format: base64
+          description: Base64-encoded content of the document.
+      example:
+        documentName: "contract.pdf"
+        documentContent: "JVBERi0xLjQKJcTl8uXrp..."
+
+
+    ValidationErrorResponse:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ProblemDetail'
+      properties:
+        errors:
+          type: array
+          description: List of error details for each invalid document.
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+                description: Error code related to the document validation.
+              documentName:
+                type: string
+                description: Name of the invalid document.
+              message:
+                type: string
+                description: Detailed error message describing the validation failure.
+    ProblemDetail:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
+        properties:
+          type: object
+          additionalProperties:
+            type: object
