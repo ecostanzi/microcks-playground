@@ -1,0 +1,29 @@
+services:
+  microcks:
+    image: quay.io/microcks/microcks-uber:1.12.0
+    environment:
+      - SERVICES_UPDATE_INTERVAL=0/10 0 * * * *
+    ports:
+      - "8085:8080"
+
+  mocks-importer:
+    depends_on:
+      - microcks
+    image: quay.io/microcks/microcks-cli:0.5.8
+    volumes:
+      - ./artifacts:/microcks/artifacts
+    entrypoint: 
+      #bash -c "microcks-cli import '/resources/openapi/apipastries-openapi.yaml:true,/resources/openapi/apipastries-apiexamples.yaml:false' --microcksURL=http://microcks:8080/api --insecure --keycloakClientId=foo --keycloakClientSecret=bar"
+      bash /microcks/artifacts/import.sh
+    restart: unless-stopped
+
+  poller:
+    build: ./poller
+    volumes:
+      - ./importers:/microcks/importers/
+    depends_on:
+      - microcks
+    environment:
+      - API_URL=http://microcks:8080/api/jobs
+      - JOBS_FILE=/microcks/importers/imports.json
+    restart: on-failure

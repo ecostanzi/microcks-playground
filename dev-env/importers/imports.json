@@ -1,0 +1,22 @@
+[
+    {
+        "name": "Document Validator",
+        "repositoryUrl": "https://code.europa.eu/simpl/simpl-open/development/iaa/common/-/raw/v2.0.0/simpl-api-iaa/src/main/resources/static/openapi/document-validator.yaml?ref_type=tags",
+        "mainArtifact": true
+    },
+    {
+        "name": "Authentication Provider",
+        "repositoryUrl": "https://code.europa.eu/simpl/simpl-open/development/iaa/common/-/raw/main/simpl-api-iaa/src/main/resources/static/openapi/authenticationprovider-v1.yaml?ref_type=heads",
+        "mainArtifact": true
+    },
+    {
+        "name": "Document Validator - Secondary",
+        "repositoryUrl": "https://code.europa.eu/simpl/simpl-open/development/iaa/common/-/raw/main/simpl-api-iaa/src/main/resources/static/openapi/document-validator-microcks.yaml",
+        "mainArtifact": false
+    },
+    {
+        "name": "Pastries - Main",
+        "repositoryUrl": "https://raw.githubusercontent.com/ecostanzi/microcks-playground/refs/heads/main/pastries/apipastries-openapi.yaml",
+        "mainArtifact": true
+    }
+]
